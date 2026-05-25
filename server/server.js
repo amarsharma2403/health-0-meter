@@ -16,7 +16,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
 
-  res.send("FitAI Backend Running 🚀");
+  res.send("Health-O-Meter Backend Running 🚀");
 
 });
 
