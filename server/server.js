@@ -33,8 +33,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content:
-              "You are a helpful AI health assistant.",
+            content: "You are a helpful AI health assistant.",
           },
           {
             role: "user",
