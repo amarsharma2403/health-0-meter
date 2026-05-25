@@ -15,9 +15,16 @@ app.get("/", (req, res) => {
 });
 
 app.post("/chat", async (req, res) => {
+
   try {
 
-    const { message } = req.body;
+    const userMessage = req.body.message;
+
+    if (!userMessage) {
+      return res.status(400).json({
+        reply: "Message is required",
+      });
+    }
 
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -25,8 +32,13 @@ app.post("/chat", async (req, res) => {
         model: "llama-3.1-8b-instant",
         messages: [
           {
+            role: "system",
+            content:
+              "You are a helpful AI health assistant.",
+          },
+          {
             role: "user",
-            content: message,
+            content: userMessage,
           },
         ],
       },
@@ -38,19 +50,26 @@ app.post("/chat", async (req, res) => {
       }
     );
 
+    const aiReply =
+      response.data.choices[0].message.content;
+
     res.json({
-      reply: response.data.choices[0].message.content,
+      reply: aiReply,
     });
 
   } catch (error) {
 
-    console.log(error.response?.data || error.message);
+    console.log(
+      "FULL ERROR:",
+      error.response?.data || error.message
+    );
 
     res.status(500).json({
-      error: "AI Error ❌",
+      reply: "Backend Error ❌",
     });
 
   }
+
 });
 
 const PORT = process.env.PORT || 5000;
