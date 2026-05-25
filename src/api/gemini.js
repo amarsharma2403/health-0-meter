@@ -3,7 +3,7 @@ export async function askGemini(message) {
   try {
 
     const response = await fetch(
-      "http://localhost:5000/chat",
+      "https://health-0-meter-api.onrender.com/chat",
       {
         method: "POST",
 

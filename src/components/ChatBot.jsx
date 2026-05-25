@@ -128,7 +128,7 @@ export default function ChatBot() {
       const response =
         await axios.post(
 
-          "http://localhost:5000/chat",
+          "https://health-0-meter-api.onrender.com/chat",
 
           {
             message:

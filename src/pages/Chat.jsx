@@ -1,115 +1,51 @@
-import { useState } from "react";
+const sendMessage = async () => {
 
-export default function Chat() {
+  if (!input) return;
 
-  const [messages, setMessages] =
-    useState([
-
-      {
-
-        role: "assistant",
-
-        text:
-          "Hello 👋 I am Health-O-Meter Assistant",
-
-      },
-
-    ]);
-
-  const [input, setInput] =
-    useState("");
-
-  const sendMessage = () => {
-
-    if (!input) return;
-
-    setMessages([
-      ...messages,
-
-      {
-
-        role: "user",
-
-        text: input,
-
-      },
-
-    ]);
-
-    setInput("");
-
+  const userMessage = {
+    sender: "user",
+    text: input,
   };
 
-  return (
+  setMessages((prev) => [
+    ...prev,
+    userMessage,
+  ]);
 
-    <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 shadow-2xl">
+  try {
 
-      <h1 className="text-3xl font-black mb-6 text-white">
+    const response = await axios.post(
+      "https://health-0-meter-api.onrender.com/chat",
+      {
+        message: input,
+      }
+    );
 
-        AI Health Chatbot 🤖
+    const botMessage = {
+      sender: "bot",
+      text: response.data.reply,
+    };
 
-      </h1>
+    setMessages((prev) => [
+      ...prev,
+      botMessage,
+    ]);
 
-      <div className="bg-black rounded-2xl p-5 h-[400px] overflow-y-auto mb-5">
+  } catch (error) {
 
-        {messages.map(
-          (msg, index) => (
+    console.log(error);
 
-            <div
-              key={index}
-              className={`mb-4 flex ${
-                msg.role === "user"
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
+    const errorMessage = {
+      sender: "bot",
+      text: "AI Error ❌",
+    };
 
-              <div
-                className={`p-4 rounded-2xl max-w-[80%] ${
-                  msg.role === "user"
-                    ? "bg-purple-600 text-white"
-                    : "bg-zinc-800 text-white"
-                }`}
-              >
+    setMessages((prev) => [
+      ...prev,
+      errorMessage,
+    ]);
 
-                {msg.text}
+  }
 
-              </div>
-
-            </div>
-
-          )
-        )}
-
-      </div>
-
-      <div className="flex gap-3">
-
-        <input
-          type="text"
-          placeholder="Ask health questions..."
-          value={input}
-          onChange={(e) =>
-            setInput(
-              e.target.value
-            )
-          }
-          className="flex-1 p-4 rounded-2xl bg-black border border-zinc-700 text-white outline-none"
-        />
-
-        <button
-          onClick={sendMessage}
-          className="bg-purple-600 hover:bg-purple-700 transition-all px-6 rounded-2xl font-bold text-white"
-        >
-
-          Send
-
-        </button>
-
-      </div>
-
-    </div>
-
-  );
-
-}
+  setInput("");
+};
