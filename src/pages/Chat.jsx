@@ -2,41 +2,32 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function Chat() {
-
   const [messages, setMessages] = useState(() => {
-    const saved =
-      localStorage.getItem("health-chat");
-
-    return saved
-      ? JSON.parse(saved)
-      : [];
+    const saved = localStorage.getItem("health-chat");
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-
     localStorage.setItem(
       "health-chat",
       JSON.stringify(messages)
     );
-
   }, [messages]);
 
   const sendMessage = async (
-    customMessage = null
+    customMessage = ""
   ) => {
-
-    const finalMessage =
+    const messageToSend =
       customMessage || input;
 
-    if (!finalMessage.trim()) return;
+    if (!messageToSend.trim()) return;
 
     const userMessage = {
       sender: "user",
-      text: finalMessage,
+      text: messageToSend,
     };
 
     setMessages((prev) => [
@@ -48,11 +39,10 @@ export default function Chat() {
     setLoading(true);
 
     try {
-
       const response = await axios.post(
         "https://health-0-meter-api.onrender.com/chat",
         {
-          message: finalMessage,
+          message: messageToSend,
         }
       );
 
@@ -65,9 +55,7 @@ export default function Chat() {
         ...prev,
         botMessage,
       ]);
-
     } catch (error) {
-
       const errorMessage = {
         sender: "bot",
         text:
@@ -78,71 +66,54 @@ export default function Chat() {
         ...prev,
         errorMessage,
       ]);
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   const clearChat = () => {
-
     setMessages([]);
     localStorage.removeItem(
       "health-chat"
     );
-
   };
 
   return (
-
-    <div
-      className={`min-h-screen p-4 transition-all duration-300 ${
-        darkMode
-          ? "bg-gray-900 text-white"
-          : "bg-gray-100 text-black"
-      }`}
-    >
-
+    <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto">
 
         {/* HEADER */}
 
-        <div className="flex justify-between items-center mb-6 gap-3">
-
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl md:text-5xl font-bold">
             Health-O-Meter
           </h1>
 
-          <div className="flex gap-2">
-
-            <button
-              onClick={() =>
-                setDarkMode(!darkMode)
-              }
-              className="bg-gray-800 text-white px-4 py-2 rounded-xl"
-            >
-              {darkMode
-                ? "Light"
-                : "Dark"}
-            </button>
-
-            <button
-              onClick={clearChat}
-              className="bg-red-500 text-white px-4 py-2 rounded-xl"
-            >
-              Clear Chat
-            </button>
-
-          </div>
-
+          <button
+            onClick={clearChat}
+            className="bg-red-500 text-white px-4 py-2 rounded-xl"
+          >
+            Clear Chat
+          </button>
         </div>
 
-        {/* CATEGORIES */}
+        {/* HERO */}
 
-        <div className="flex flex-wrap gap-3 mb-5">
+        {messages.length === 0 && (
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-400 mb-2">
+              Welcome to Health-O-Meter
+            </h2>
+
+            <p className="text-gray-500">
+              Ask anything about your health and wellness.
+            </p>
+          </div>
+        )}
+
+        {/* HEALTH CATEGORIES */}
+
+        <div className="flex flex-wrap gap-3 mb-5 justify-center md:justify-start">
 
           <button
             onClick={() =>
@@ -191,99 +162,56 @@ export default function Chat() {
           <button
             onClick={() =>
               sendMessage(
-                "What is BMI and how to calculate it?"
+                "Explain BMI and how to calculate it"
               )
             }
             className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full"
           >
             BMI
           </button>
-
         </div>
 
         {/* CHAT BOX */}
 
-        <div
-          className={`rounded-3xl p-4 shadow-xl overflow-y-auto h-[350px] md:h-[450px] ${
-            darkMode
-              ? "bg-gray-800"
-              : "bg-white"
-          }`}
-        >
-
-          {messages.length === 0 && (
-
-            <div className="h-full flex flex-col items-center justify-center text-center">
-
-              <div className="text-6xl mb-4">
-                🩺
-              </div>
-
-              <h2 className="text-2xl font-bold text-gray-400 mb-2">
-                AI Health Assistant
-              </h2>
-
-              <p className="text-gray-400">
-                Ask health and wellness questions.
-              </p>
-
-            </div>
-
-          )}
+        <div className="bg-white rounded-3xl shadow-lg p-4 h-[400px] overflow-y-auto">
 
           {messages.map(
             (msg, index) => (
-
               <div
                 key={index}
-                className={`mb-4 flex ${
+                className={`flex mb-4 ${
                   msg.sender === "user"
                     ? "justify-end"
                     : "justify-start"
                 }`}
               >
-
                 <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                  className={`max-w-[80%] px-4 py-3 rounded-2xl break-words whitespace-pre-wrap ${
                     msg.sender === "user"
                       ? "bg-purple-600 text-white"
-                      : darkMode
-                      ? "bg-gray-700 text-white"
                       : "bg-gray-200 text-black"
                   }`}
                 >
                   {msg.text}
                 </div>
-
               </div>
-
             )
           )}
 
+          {/* LOADING */}
+
           {loading && (
-
             <div className="flex justify-start">
-
-              <div
-                className={`px-4 py-3 rounded-2xl ${
-                  darkMode
-                    ? "bg-gray-700"
-                    : "bg-gray-200"
-                }`}
-              >
+              <div className="bg-gray-200 px-4 py-3 rounded-2xl">
                 Thinking...
               </div>
-
             </div>
-
           )}
-
         </div>
 
         {/* INPUT */}
 
         <div className="flex gap-3 mt-5">
-
           <input
             type="text"
             placeholder="Ask health questions..."
@@ -291,38 +219,25 @@ export default function Chat() {
             onChange={(e) =>
               setInput(e.target.value)
             }
-            className={`flex-1 p-4 rounded-2xl outline-none ${
-              darkMode
-                ? "bg-gray-800 text-white"
-                : "bg-white text-black"
-            }`}
+            className="flex-1 p-4 rounded-2xl outline-none border"
           />
 
           <button
-            onClick={() =>
-              sendMessage()
-            }
+            onClick={() => sendMessage()}
             className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-6 py-3 rounded-2xl"
           >
             Send
           </button>
-
         </div>
 
         {/* DISCLAIMER */}
 
-        <div className="text-center mt-6 text-sm text-gray-400">
-
+        <div className="text-center text-sm text-gray-500 mt-6">
           This AI assistant provides general health information only.
           <br />
           It is not a substitute for professional medical advice.
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 }
