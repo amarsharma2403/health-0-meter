@@ -7,7 +7,13 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://health-0-meter.netlify.app",
+    "http://localhost:5173"
+  ]
+}));
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -30,10 +36,12 @@ app.post("/chat", async (req, res) => {
       "https://api.groq.com/openai/v1/chat/completions",
       {
         model: "llama-3.1-8b-instant",
+
         messages: [
           {
             role: "system",
-            content: "You are a helpful AI health assistant.",
+            content:
+              "You are a helpful AI health assistant.",
           },
           {
             role: "user",
@@ -41,10 +49,14 @@ app.post("/chat", async (req, res) => {
           },
         ],
       },
+
       {
         headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json",
+          Authorization:
+            `Bearer ${process.env.GROQ_API_KEY}`,
+
+          "Content-Type":
+            "application/json",
         },
       }
     );
@@ -74,5 +86,7 @@ app.post("/chat", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} 🚀`);
+  console.log(
+    `Server running on port ${PORT} 🚀`
+  );
 });
