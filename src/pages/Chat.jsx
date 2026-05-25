@@ -3,38 +3,25 @@ import axios from "axios";
 
 export default function Chat() {
 
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("health-chat");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [input, setInput] = useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [darkMode, setDarkMode] =
-    useState(false);
-
-  const [messages, setMessages] =
-    useState(() => {
-
-      const saved =
-        localStorage.getItem("health-chat");
-
-      return saved
-        ? JSON.parse(saved)
-        : [];
-
-    });
+  const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-
     localStorage.setItem(
       "health-chat",
       JSON.stringify(messages)
     );
-
   }, [messages]);
 
   const sendMessage = async () => {
 
-    if (!input) return;
+    if (!input.trim()) return;
 
     const userMessage = {
       sender: "user",
@@ -46,15 +33,13 @@ export default function Chat() {
       userMessage,
     ]);
 
+    setInput("");
     setLoading(true);
 
     try {
 
-      const API_URL =
-        import.meta.env.VITE_API_URL;
-
       const response = await axios.post(
-        `${API_URL}/chat`,
+        "https://health-0-meter-api.onrender.com/chat",
         {
           message: input,
         }
@@ -72,8 +57,6 @@ export default function Chat() {
 
     } catch (error) {
 
-      console.log(error);
-
       const errorMessage = {
         sender: "bot",
         text:
@@ -85,52 +68,56 @@ export default function Chat() {
         errorMessage,
       ]);
 
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-
-    setInput("");
-
   };
 
-  return (
+  const clearChat = () => {
+    setMessages([]);
+    localStorage.removeItem("health-chat");
+  };
 
+  const categories = [
+    "Diet",
+    "Exercise",
+    "Sleep",
+    "Stress",
+    "BMI",
+  ];
+
+  return (
     <div
-      className={
+      className={`min-h-screen p-4 md:p-8 transition-all duration-300 ${
         darkMode
-          ? "min-h-screen bg-black text-white p-4"
-          : "min-h-screen bg-gray-100 text-black p-4"
-      }
+          ? "bg-gray-900 text-white"
+          : "bg-gray-100 text-black"
+      }`}
     >
 
-      <div className="max-w-2xl mx-auto">
+      {/* HEADER */}
+      <div className="max-w-5xl mx-auto">
 
-        {/* TOP BAR */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-8">
 
-        <div className="flex justify-between items-center mb-4">
-
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl md:text-5xl font-bold break-words">
             Health-O-Meter
           </h1>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
 
             <button
               onClick={() =>
                 setDarkMode(!darkMode)
               }
-              className="bg-gray-800 text-white px-4 py-2 rounded-lg"
+              className="bg-gray-800 text-white px-5 py-3 rounded-2xl"
             >
-              {darkMode
-                ? "Light"
-                : "Dark"}
+              {darkMode ? "Light" : "Dark"}
             </button>
 
             <button
-              onClick={() =>
-                setMessages([])
-              }
-              className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              onClick={clearChat}
+              className="bg-red-500 text-white px-5 py-3 rounded-2xl"
             >
               Clear Chat
             </button>
@@ -140,107 +127,102 @@ export default function Chat() {
         </div>
 
         {/* HERO */}
+        <div className="text-center mb-10">
 
-        {
-          messages.length === 0 && (
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-gray-400">
+            Welcome to Health-O-Meter
+          </h2>
 
-            <div className="text-center text-gray-400 mt-10 mb-10">
+          <p className="text-xl text-gray-400">
+            Ask anything about your health and wellness.
+          </p>
 
-              <h2 className="text-2xl font-bold mb-2">
-                Welcome to Health-O-Meter
-              </h2>
+        </div>
 
-              <p>
-                Ask anything about your health and wellness.
-              </p>
+        {/* CATEGORIES */}
+        <div className="flex flex-wrap gap-3 mb-8">
 
-            </div>
+          {categories.map((item, index) => (
 
-          )
-        }
+            <button
+              key={index}
+              onClick={() => setInput(item)}
+              className="bg-blue-100 text-blue-700 px-5 py-3 rounded-full"
+            >
+              {item}
+            </button>
 
-        {/* HEALTH CATEGORIES */}
-
-        <div className="flex gap-2 flex-wrap mb-4">
-
-          {
-            [
-              "Diet",
-              "Exercise",
-              "Sleep",
-              "Stress",
-              "BMI",
-            ].map((item) => (
-
-              <button
-                key={item}
-                onClick={() =>
-                  setInput(item)
-                }
-                className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
-              >
-                {item}
-              </button>
-
-            ))
-          }
+          ))}
 
         </div>
 
         {/* CHAT BOX */}
+        <div
+          className={`rounded-3xl p-4 md:p-6 shadow-xl overflow-y-auto h-[400px] md:h-[500px] ${
+            darkMode
+              ? "bg-gray-800"
+              : "bg-white"
+          }`}
+        >
 
-        <div className="bg-white rounded-xl shadow-lg p-4 h-[500px] overflow-y-auto">
+          {messages.length === 0 && (
 
-          {
+            <div className="h-full flex items-center justify-center text-center text-gray-400 text-lg">
+              Start chatting with your AI health assistant 🚀
+            </div>
 
-            messages.map(
-              (msg, index) => (
+          )}
 
-                <div
-                  key={index}
-                  className={
-                    msg.sender === "user"
-                      ? "text-right mb-3"
-                      : "text-left mb-3"
-                  }
-                >
+          {messages.map((msg, index) => (
 
-                  <div
-                    className={
-                      msg.sender === "user"
-                        ? "inline-block bg-purple-500 text-white px-4 py-2 rounded-xl max-w-[80%] break-words"
-                        : "inline-block bg-gray-200 text-black px-4 py-2 rounded-xl max-w-[80%] break-words"
-                    }
-                  >
-                    {msg.text}
-                  </div>
+            <div
+              key={index}
+              className={`mb-4 flex ${
+                msg.sender === "user"
+                  ? "justify-end"
+                  : "justify-start"
+              }`}
+            >
 
-                </div>
-
-              )
-            )
-
-          }
-
-          {
-
-            loading && (
-
-              <div className="text-left text-gray-400 italic animate-pulse">
-
-                Thinking...
-
+              <div
+                className={`max-w-[85%] md:max-w-[70%] px-5 py-3 rounded-2xl text-sm md:text-base ${
+                  msg.sender === "user"
+                    ? "bg-purple-600 text-white"
+                    : darkMode
+                    ? "bg-gray-700 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+              >
+                {msg.text}
               </div>
 
-            )
+            </div>
 
-          }
+          ))}
+
+          {/* LOADING */}
+          {loading && (
+
+            <div className="flex justify-start">
+
+              <div
+                className={`px-5 py-3 rounded-2xl ${
+                  darkMode
+                    ? "bg-gray-700"
+                    : "bg-gray-200"
+                }`}
+              >
+                Thinking...
+              </div>
+
+            </div>
+
+          )}
 
         </div>
 
-        {/* INPUT AREA */}
-
-        <div className="flex gap-2 mt-4">
+        {/* INPUT */}
+        <div className="flex flex-col md:flex-row gap-4 mt-6">
 
           <input
             type="text"
@@ -249,12 +231,16 @@ export default function Chat() {
             onChange={(e) =>
               setInput(e.target.value)
             }
-            className="flex-1 border rounded-lg px-4 py-3 outline-none text-black"
+            className={`flex-1 p-4 rounded-2xl outline-none text-lg ${
+              darkMode
+                ? "bg-gray-800 text-white"
+                : "bg-white text-black"
+            }`}
           />
 
           <button
             onClick={sendMessage}
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg"
+            className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-purple-700 text-white px-8 py-4 rounded-2xl text-lg"
           >
             Send
           </button>
@@ -262,18 +248,16 @@ export default function Chat() {
         </div>
 
         {/* DISCLAIMER */}
-
-        <p className="text-xs text-center text-gray-400 mt-6 px-4">
+        <div className="text-center mt-8 text-sm text-gray-400">
 
           This AI assistant provides general health information only.
+          <br />
           It is not a substitute for professional medical advice.
 
-        </p>
+        </div>
 
       </div>
 
     </div>
-
   );
-
 }
