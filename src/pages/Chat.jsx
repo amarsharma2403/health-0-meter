@@ -208,7 +208,7 @@ export default function Chat() {
                   <div
                     className={
                       msg.sender === "user"
-                        ? "inline-block bg-blue-500 text-white px-4 py-2 rounded-xl max-w-[80%] break-words"
+                        ? "inline-block bg-purple-500 text-white px-4 py-2 rounded-xl max-w-[80%] break-words"
                         : "inline-block bg-gray-200 text-black px-4 py-2 rounded-xl max-w-[80%] break-words"
                     }
                   >
@@ -244,17 +244,17 @@ export default function Chat() {
 
           <input
             type="text"
-            placeholder="Ask your health question..."
+            placeholder="Ask health questions..."
             value={input}
             onChange={(e) =>
               setInput(e.target.value)
             }
-            className="flex-1 border rounded-lg px-4 py-3 outline-none"
+            className="flex-1 border rounded-lg px-4 py-3 outline-none text-black"
           />
 
           <button
             onClick={sendMessage}
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg"
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg"
           >
             Send
           </button>
