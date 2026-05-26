@@ -8,18 +8,10 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow all netlify.app subdomains + localhost
-    if (
-      !origin ||
-      origin.endsWith(".netlify.app") ||
-      origin === "http://localhost:5173"
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  }
+  origin: [
+    "https://health-0-meter.netlify.app",
+    "http://localhost:5173"
+  ]
 }));
 
 app.use(express.json());
@@ -29,7 +21,9 @@ app.get("/", (req, res) => {
 });
 
 app.post("/chat", async (req, res) => {
+
   try {
+
     const userMessage = req.body.message;
 
     if (!userMessage) {
@@ -42,10 +36,12 @@ app.post("/chat", async (req, res) => {
       "https://api.groq.com/openai/v1/chat/completions",
       {
         model: "llama-3.1-8b-instant",
+
         messages: [
           {
             role: "system",
-            content: "You are a helpful AI health assistant.",
+            content:
+              "You are a helpful AI health assistant.",
           },
           {
             role: "user",
@@ -53,26 +49,44 @@ app.post("/chat", async (req, res) => {
           },
         ],
       },
+
       {
         headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json",
+          Authorization:
+            `Bearer ${process.env.GROQ_API_KEY}`,
+
+          "Content-Type":
+            "application/json",
         },
       }
     );
 
-    const aiReply = response.data.choices[0].message.content;
+    const aiReply =
+      response.data.choices[0].message.content;
 
-    res.json({ reply: aiReply });
+    res.json({
+      reply: aiReply,
+    });
 
   } catch (error) {
-    console.log("FULL ERROR:", error.response?.data || error.message);
-    res.status(500).json({ reply: "Backend Error ❌" });
+
+    console.log(
+      "FULL ERROR:",
+      error.response?.data || error.message
+    );
+
+    res.status(500).json({
+      reply: "Backend Error ❌",
+    });
+
   }
+
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} 🚀`);
+  console.log(
+    `Server running on port ${PORT} 🚀`
+  );
 });
